@@ -22,7 +22,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: '3.24.0'   # 替换为你的版本
+          flutter-version: '3.27.3'
 
       # 3. 获取依赖
       - name: Flutter pub get

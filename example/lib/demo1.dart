@@ -22,11 +22,9 @@ class Demo1 extends StatelessWidget {
         ),
         ElevatedButton(
           onPressed: () async {
-
-            List<DateTime>? date = await showYCalendar<List<DateTime>>(
+            List<DateTime>? date = await YCalendar<List<DateTime>>(
               cumFlitter: true,
-              context: context,
-            );
+            ).showBottomSheet(context);
             data.value =
                 date?.map(DateFormat('yyyy-MM-dd').format).toString() ?? "";
           },

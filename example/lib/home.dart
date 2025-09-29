@@ -22,10 +22,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Demo1(),
-            Demo2(),
-          ],
+          children: <Widget>[Demo1(), Demo2()],
         ),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );

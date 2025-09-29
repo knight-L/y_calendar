@@ -22,9 +22,7 @@ class Demo2 extends StatelessWidget {
         ),
         ElevatedButton(
           onPressed: () async {
-            final date = await showYCalendar<DateTime>(
-              context: context,
-            );
+            final date = await YCalendar<DateTime>().showBottomSheet(context);
             if (date != null) {
               data.value = DateFormat('yyyy-MM-dd').format(date);
             }

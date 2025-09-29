@@ -1,57 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:y_calendar/y_flitter_date.dart';
 
-import 'y_month_title.dart';
-import 'y_title.dart';
-import 'y_weekdays.dart';
-
-Future<T?> showYCalendar<T>({
-  required BuildContext context,
-  DateTimeRange? initialDateRange,
-  DateTime? minDate,
-  DateTime? maxDate,
-  bool? cumFlitter,
-  T? defaultDate,
-}) async {
-  assert(
-    T == DateTime || T == List<DateTime>,
-    'T 只能是 DateTime 或 List<DateTime>，但传入的是 $T',
-  );
-  assert(initialDateRange == null, 'initialDateRange 不能为空');
-  assert(
-    initialDateRange == null ||
-        !initialDateRange.start.isAfter(initialDateRange.end),
-    "开始时间不能小于结束时间",
-  );
-  if (minDate != null && maxDate != null) {
-    minDate = DateUtils.dateOnly(minDate);
-    maxDate = DateUtils.dateOnly(maxDate);
-    assert(
-      !maxDate.isBefore(minDate),
-      'maxDate $maxDate 必须在 minDate $minDate 之后',
-    );
-  }
-  assert(debugCheckHasMaterialLocalizations(context));
-
-  if (initialDateRange != null) {
-    initialDateRange = DateUtils.datesOnly(initialDateRange);
-  }
-
-  return showModalBottomSheet<T>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    isDismissible: true,
-    builder:
-        (BuildContext context) => YCalendar<T>(
-          minDate: minDate,
-          maxDate: maxDate,
-          defaultDate: defaultDate,
-          cumFlitter: cumFlitter,
-          color: Theme.of(context).primaryColor,
-        ),
-  );
-}
+import 'y_flitter_date.dart';
+import 'y_month_Item.dart';
+import 'y_top.dart';
 
 class YCalendar<T> extends StatefulWidget {
   // 日历标题
@@ -67,10 +18,7 @@ class YCalendar<T> extends StatefulWidget {
   final DateTime? maxDate;
 
   // 默认选中的日期
-  final dynamic defaultDate;
-
-  // 日期行高
-  final double rowHeight;
+  final T? defaultDate;
 
   // 是否显示圆角弹窗
   final BorderRadiusGeometry round;
@@ -90,39 +38,48 @@ class YCalendar<T> extends StatefulWidget {
   // 自定义过滤项
   final bool? cumFlitter;
 
-  // 日期选择完成后触发
-  final ValueChanged<T>? onConfirm;
-
   const YCalendar({
     super.key,
     this.title = "日期选择",
-    this.color = const Color(0xff1989fa),
+    this.color,
     this.minDate,
     this.maxDate,
     this.defaultDate,
-    this.rowHeight = 60.0,
     this.round = const BorderRadius.vertical(top: Radius.circular(20.0)),
     this.showConfirm = true,
     this.closeOnClickOverlay = true,
     this.confirmText = "确定",
     this.height = 400.0,
     this.cumFlitter,
-    this.onConfirm,
-  });
+  }) : assert(
+         T == DateTime || T == List<DateTime>,
+         'T 只能是 DateTime 或 List<DateTime>，但传入的是 $T',
+       );
 
   @override
-  State<YCalendar> createState() => _CalendarState<T>();
+  State<YCalendar> createState() => _YCalendarState<T>();
+
+  /// 将日历作为底部弹窗显示
+  Future<T?> showBottomSheet(
+    BuildContext context, {
+    bool isScrollControlled = true,
+    Color backgroundColor = Colors.transparent,
+    bool isDismissible = true,
+  }) async {
+    return showModalBottomSheet<T>(
+      context: context,
+      isScrollControlled: isScrollControlled,
+      backgroundColor: backgroundColor,
+      isDismissible: isDismissible,
+      builder: (context) => this,
+    );
+  }
 }
 
-class _CalendarState<T> extends State<YCalendar<T>> {
-  late List<DateTime> _defaultDate;
-  late DateTime _currentDate;
+class _YCalendarState<T> extends State<YCalendar<T>> {
+  List<DateTime> _currentDate = [];
   late DateTime _minDate;
   late DateTime _maxDate;
-  DateTime? _startDate;
-  DateTime? _endDate;
-  final String _startString = "开始";
-  final String _endString = "结束";
   bool _isRange = false;
   int _initialMonthIndex = 0;
   final DateTime dateOnly = DateUtils.dateOnly(DateTime.now());
@@ -131,7 +88,12 @@ class _CalendarState<T> extends State<YCalendar<T>> {
   void initState() {
     super.initState();
     _isRange = T == List<DateTime>;
-    _defaultDate = widget.defaultDate ?? [];
+    if (widget.defaultDate != null) {
+      _currentDate =
+          _isRange
+              ? widget.defaultDate as List<DateTime>
+              : [widget.defaultDate as DateTime];
+    }
     _minDate = widget.minDate ?? dateOnly;
     _maxDate = widget.maxDate ?? dateOnly.add(const Duration(days: 180));
 
@@ -146,278 +108,66 @@ class _CalendarState<T> extends State<YCalendar<T>> {
   void onChange() {
     _initialMonthIndex = DateUtils.monthDelta(
       _minDate,
-      _defaultDate.isNotEmpty ? _defaultDate.first : dateOnly,
+      _currentDate.isNotEmpty ? _currentDate.first : dateOnly,
     );
-    if (_defaultDate.isEmpty) return;
+    if (_currentDate.isEmpty) return;
 
     if (_isRange) {
-      _startDate =
-          DateUtils.dateOnly(_defaultDate.first).isAfter(_maxDate)
-              ? _maxDate
-              : DateUtils.dateOnly(_defaultDate.first);
-      _endDate =
-          DateUtils.dateOnly(_defaultDate.last).isAfter(_maxDate)
-              ? _maxDate
-              : DateUtils.dateOnly(_defaultDate.last);
+      for (var el in _currentDate) {
+        var newEl = DateUtils.dateOnly(el);
+        el = newEl.isAfter(_maxDate) ? _maxDate : newEl;
+      }
     } else {
-      _currentDate = _defaultDate.first;
+      _currentDate = [_currentDate.first];
     }
   }
 
-  void close(BuildContext context, T date) {
+  void close(T date) {
     Navigator.pop(context, date);
   }
 
-  Widget buildTop() {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: widget.round,
-        color: Theme.of(context).cardColor,
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 10.0, // has the effect of softening the shadow
-            spreadRadius: 0, // has the effect of extending the shadow
-            offset: Offset(
-              0, // horizontal, move right 10
-              2, // vertical, move down 10
-            ),
-          ),
-        ],
-      ),
-      child: Column(
-        children: <Widget>[YTitle(title: widget.title), YWeekdays()],
-      ),
-    );
-  }
+  void select(DateTime value) {
+    setState(() {
+      if (_isRange) {
+        // 范围
+        if (_currentDate.length >= 2 ||
+            (_currentDate.isNotEmpty && value.isBefore(_currentDate.first))) {
+          _currentDate.clear();
+        }
+        _currentDate.add(value);
 
-  Widget buildCalendarItem(int year, int month, int day) {
-    DateTime currentDate = DateTime(year, month, day);
-    bool isEmpty = day < 1;
-    bool isSelected =
-        !_isRange && !isEmpty && DateUtils.isSameDay(currentDate, _currentDate);
-    double dayItemWidth = (MediaQuery.of(context).size.width ~/ 7).toDouble();
-    bool disable =
-        currentDate.isBefore(DateUtils.dateOnly(_minDate)) ||
-        currentDate.isAfter(DateUtils.dateOnly(_maxDate));
-
-    bool isStart =
-        _isRange ? DateUtils.isSameDay(currentDate, _startDate) : false;
-    bool isEnd = _isRange ? DateUtils.isSameDay(currentDate, _endDate) : false;
-    bool isCenter =
-        (_isRange && _startDate != null && _endDate != null && !isEmpty) &&
-        currentDate.isAfter(_startDate!) &&
-        currentDate.isBefore(_endDate!);
-
-    String info = "";
-    BorderRadiusGeometry? borderRadius() {
-      if (DateUtils.isSameDay(_startDate, _endDate)) {
-        info =
-            DateUtils.isSameDay(currentDate, _startDate)
-                ? '$_startString/$_endString'
-                : '';
-        return BorderRadius.circular(4.0);
-      } else if (isStart) {
-        info = _startString;
-        return const BorderRadius.horizontal(left: Radius.circular(4.0));
-      } else if (isEnd) {
-        info = _endString;
-        return const BorderRadius.horizontal(right: Radius.circular(4.0));
+        if (!widget.showConfirm && _currentDate.length == 2) {
+          close(_currentDate as T);
+        }
       } else {
-        info = "";
-        return null;
+        // 单选
+        _currentDate.insert(0, value);
+        if (!widget.showConfirm) {
+          close(_currentDate.first as T);
+        }
       }
-    }
-
-    return SizedBox(
-      width: dayItemWidth,
-      height: widget.rowHeight,
-      child: Visibility(
-        visible: !isEmpty,
-        child: Material(
-          type: MaterialType.transparency,
-          child: Ink(
-            decoration: BoxDecoration(
-              borderRadius: borderRadius(),
-              color:
-                  isSelected || isStart || isEnd
-                      ? widget.color
-                      : isCenter
-                      ? widget.color?.withAlpha((255 * 0.1).round())
-                      : null,
-            ),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(4.0),
-              onTap:
-                  isEmpty || disable
-                      ? null
-                      : () {
-                        setState(() {
-                          if (_isRange) {
-                            // 范围
-                            if (_startDate == null ||
-                                currentDate.isBefore(_startDate!) ||
-                                _startDate != null && _endDate != null) {
-                              _startDate = currentDate;
-                              _endDate = null;
-                            } else if (_startDate != null &&
-                                _endDate == null &&
-                                currentDate.difference(_startDate!).inDays >=
-                                    0) {
-                              _endDate = currentDate;
-                            }
-
-                            if (!widget.showConfirm &&
-                                _startDate != null &&
-                                _endDate != null) {
-                              close(context, [_startDate!, _endDate!] as T);
-                              widget.onConfirm?.call(
-                                [_startDate, _endDate] as T,
-                              );
-                            }
-                          } else {
-                            // 单选
-                            _currentDate = currentDate;
-                            if (!widget.showConfirm) {
-                              close(context, _currentDate as T);
-                              widget.onConfirm?.call(_currentDate as T);
-                            }
-                          }
-                        });
-                      },
-              child: Stack(
-                children: <Widget>[
-                  Center(
-                    child: Text(
-                      "$day",
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        color:
-                            isSelected || isStart || isEnd
-                                ? Colors.white
-                                : isCenter
-                                ? widget.color ?? const Color(0xff1989fa)
-                                : disable
-                                ? const Color(0xffc8c9cc)
-                                : const Color(0xff323233),
-                      ),
-                    ),
-                  ),
-                  Align(
-                    alignment: const Alignment(0, 0.8),
-                    child: Text(
-                      info,
-                      style: const TextStyle(
-                        fontSize: 10.0,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+    });
   }
 
-  Widget buildConfirmButton() {
-    bool disable =
-        (!_isRange && _currentDate == null) ||
-        (_isRange && (_startDate == null || _endDate == null));
-    return Container(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Visibility(
-            visible: widget.cumFlitter ?? false,
-            child: YFlitterDate(
-              onChange: (val) {
-                setState(() {
-                  _defaultDate = val.map((e) => DateTime.parse(e)).toList();
-                  onChange();
-                });
-              },
-            ),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: widget.color),
-            onPressed:
-                disable
-                    ? null
-                    : () {
-                      if (_startDate != null && _endDate != null) {
-                        close(context, [_startDate!, _endDate!] as T);
-                        widget.onConfirm?.call([_startDate!, _endDate!] as T);
-                      } else if (_currentDate != null) {
-                        close(context, _currentDate as T);
-                        widget.onConfirm?.call(_currentDate as T);
-                      }
-                    },
-            child: Text(widget.confirmText),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMonthItem(int index, bool beforeInitialMonth) {
-    int monthIndex =
-        beforeInitialMonth
-            ? _initialMonthIndex - index - 1
-            : _initialMonthIndex + index;
-    DateTime month = DateUtils.addMonthsToMonthDate(_minDate, monthIndex);
-
-    int currentYear = month.year;
-    int currentMonth = month.month;
-
-    int lastDay = DateTime(currentYear, currentMonth + 1, 0).day;
-    int emptyDays = DateTime(currentYear, currentMonth, 1).weekday % 7;
-
-    return IntrinsicHeight(
-      child: Stack(
-        children: <Widget>[
-          // 背景
-          Align(
-            child: Text(
-              "$currentMonth",
-              style: const TextStyle(
-                fontSize: 150.0,
-                fontWeight: FontWeight.w500,
-                color: Color(0xfff2f3f5),
-              ),
-            ),
-          ),
-          Column(
-            children: <Widget>[
-              YMonthTitle(year: currentYear, month: currentMonth),
-              Wrap(
-                children: List.generate(lastDay + emptyDays, (i) {
-                  int day = i - emptyDays + 1;
-                  return buildCalendarItem(currentYear, currentMonth, day);
-                }),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+  void confirm() {
+    close(_isRange ? _currentDate as T : _currentDate.first as T);
   }
 
   int get _numberOfMonths => DateUtils.monthDelta(_minDate, _maxDate) + 1;
 
+  final Key sliverAfterKey = Key('sliverAfterKey');
+
   @override
   Widget build(BuildContext context) {
-    const Key sliverAfterKey = Key('sliverAfterKey');
+    final theme = Theme.of(context);
+    final color = widget.color ?? theme.primaryColor;
 
     return AspectRatio(
       aspectRatio: 0.7,
       child: Container(
         decoration: BoxDecoration(
           borderRadius: widget.round,
-          color: Theme.of(context).cardColor,
+          color: theme.cardColor,
         ),
         child: SafeArea(
           child: Column(
@@ -425,7 +175,7 @@ class _CalendarState<T> extends State<YCalendar<T>> {
               Expanded(
                 child: Column(
                   children: <Widget>[
-                    buildTop(),
+                    YTop(title: widget.title, round: widget.round),
                     Expanded(
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -434,16 +184,36 @@ class _CalendarState<T> extends State<YCalendar<T>> {
                           slivers: <Widget>[
                             SliverList(
                               delegate: SliverChildBuilderDelegate(
-                                (BuildContext context, int index) =>
-                                    _buildMonthItem(index, true),
+                                (BuildContext context, int index) => YMonthItem(
+                                  color: color,
+                                  minDate: _minDate,
+                                  maxDate: _maxDate,
+                                  isRange: _isRange,
+                                  selectDate: _currentDate,
+                                  month: DateUtils.addMonthsToMonthDate(
+                                    _minDate,
+                                    _initialMonthIndex - index - 1,
+                                  ),
+                                  onSelect: select,
+                                ),
                                 childCount: _initialMonthIndex,
                               ),
                             ),
                             SliverList(
                               key: sliverAfterKey,
                               delegate: SliverChildBuilderDelegate(
-                                (context, index) =>
-                                    _buildMonthItem(index, false),
+                                (context, index) => YMonthItem(
+                                  color: color,
+                                  minDate: _minDate,
+                                  maxDate: _maxDate,
+                                  isRange: _isRange,
+                                  selectDate: _currentDate,
+                                  month: DateUtils.addMonthsToMonthDate(
+                                    _minDate,
+                                    _initialMonthIndex + index,
+                                  ),
+                                  onSelect: select,
+                                ),
                                 childCount:
                                     _numberOfMonths - _initialMonthIndex,
                               ),
@@ -457,7 +227,36 @@ class _CalendarState<T> extends State<YCalendar<T>> {
               ),
               Visibility(
                 visible: widget.showConfirm,
-                child: buildConfirmButton(),
+                child: Container(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Visibility(
+                        visible: widget.cumFlitter ?? false,
+                        child: YFlitterDate(
+                          onChange: (val) {
+                            setState(() {
+                              _currentDate =
+                                  val.map((e) => DateTime.parse(e)).toList();
+                              onChange();
+                            });
+                          },
+                        ),
+                      ),
+                      FilledButton(
+                        style: FilledButton.styleFrom(backgroundColor: color),
+                        onPressed:
+                            (_isRange
+                                    ? _currentDate.length == 2
+                                    : _currentDate.isNotEmpty)
+                                ? confirm
+                                : null,
+                        child: Text(widget.confirmText),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),

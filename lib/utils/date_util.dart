@@ -249,6 +249,25 @@ class DateUtil {
     ];
   }
 
+  /// 获取下周
+  static List<String> getNextWeek(DateTime date) {
+    // 当前周的周一
+    final thisWeekMonday = date.subtract(Duration(days: date.weekday - 1));
+    // 下周周一
+    final nextWeekMonday = thisWeekMonday.add(Duration(days: 7));
+    final nextWeekStart = DateTime(
+      nextWeekMonday.year,
+      nextWeekMonday.month,
+      nextWeekMonday.day,
+    );
+
+    final nextWeekSunday = nextWeekStart.add(Duration(days: 6));
+    return [
+      DateFormat('yyyy-MM-dd').format(nextWeekStart),
+      DateFormat('yyyy-MM-dd').format(nextWeekSunday),
+    ];
+  }
+
   /// 获取本月
   static List<String> getThisMonth(DateTime date) {
     int year = date.year, month = date.month;
@@ -276,6 +295,22 @@ class DateUtil {
     return [
       DateFormat('yyyy-MM-dd').format(DateTime(year, month, 1)),
       DateFormat('yyyy-MM-dd').format(DateTime(year, month, day)),
+    ];
+  }
+
+  /// 获取下月
+  static List<String> getNextMonth(DateTime date) {
+    // 下月第一天
+    final nextMonthStart = DateTime(date.year, date.month + 1, 1);
+    // 下月最后一天 = 下下月第一天 - 1 天
+    final nextMonthEnd = DateTime(
+      nextMonthStart.year,
+      nextMonthStart.month + 1,
+      1,
+    ).subtract(Duration(days: 1));
+    return [
+      DateFormat('yyyy-MM-dd').format(nextMonthStart),
+      DateFormat('yyyy-MM-dd').format(nextMonthEnd),
     ];
   }
 }

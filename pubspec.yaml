@@ -1,7 +1,7 @@
 name: y_calendar
 description: "A new Flutter project."
 version: 0.0.1
-homepage:
+homepage: "https://github.com/knight-L/y_calendar"
 
 environment:
   sdk: ^3.7.0

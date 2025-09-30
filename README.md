@@ -7,6 +7,16 @@
 - ✅ 支持单日期选择
 - ✅ 支持日期范围选择
 
+## 示例
+
+预览地址：[knight-l.github.io/y_calendar/](https://knight-l.github.io/y_calendar/ "https://knight-l.github.io/y_calendar/")
+
+|         范围选择         |         单日期选择         |
+| :----------------------: | :------------------------: |
+| ![范围选择](./demo1.gif) | ![单日期选择](./demo2.gif) |
+
+完整的示例代码请查看 `example` 文件夹中的演示应用。
+
 ## 安装
 
 在 `pubspec.yaml` 文件中添加依赖：
@@ -97,23 +107,6 @@ YCalendar<DateTime>(
 
 - `YCalendar<DateTime>`: 单日期选择模式
 - `YCalendar<List<DateTime>>`: 日期范围选择模式
-
-## 示例
-
-预览地址：[knight-l.github.io/y_calendar/](https://knight-l.github.io/y_calendar/ "https://knight-l.github.io/y_calendar/")
-
-|         范围选择         |         单日期选择         |
-| :----------------------: | :------------------------: |
-| ![范围选择](./demo1.gif) | ![单日期选择](./demo2.gif) |
-
-完整的示例代码请查看 `example` 文件夹中的演示应用。
-
-运行示例：
-
-```bash
-cd example
-flutter run
-```
 
 ## 依赖
 

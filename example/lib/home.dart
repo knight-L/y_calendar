@@ -32,45 +32,60 @@ class _MyHomePageState extends State<MyHomePage> {
         child: ListView(
           shrinkWrap: true,
           children: <Widget>[
-            SegmentedButton<ThemeMode>(
-              segments: [
-                ButtonSegment(
-                  value: ThemeMode.system,
-                  label: Text("跟随系统"),
-                  icon: Icon(Icons.brightness_auto),
-                ),
-                ButtonSegment(
-                  value: ThemeMode.light,
-                  label: Text("浅色模式"),
-                  icon: Icon(Icons.light_mode),
-                ),
-                ButtonSegment(
-                  value: ThemeMode.dark,
-                  label: Text("深色模式"),
-                  icon: Icon(Icons.dark_mode),
-                ),
-              ],
-              selected: {widget.theme.mode},
-              onSelectionChanged: (v) {
-                widget.onThemeMode?.call(v.first);
-              },
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: SegmentedButton<ThemeMode>(
+                showSelectedIcon: false,
+                segments: [
+                  ButtonSegment(
+                    value: ThemeMode.system,
+                    label: Text(
+                      "跟随系统",
+                      style: TextStyle(overflow: TextOverflow.ellipsis),
+                    ),
+                    icon: Icon(Icons.brightness_auto),
+                  ),
+                  ButtonSegment(
+                    value: ThemeMode.light,
+                    label: Text(
+                      "浅色模式",
+                      style: TextStyle(overflow: TextOverflow.ellipsis),
+                    ),
+                    icon: Icon(Icons.light_mode),
+                  ),
+                  ButtonSegment(
+                    value: ThemeMode.dark,
+                    label: Text(
+                      "深色模式",
+                      style: TextStyle(overflow: TextOverflow.ellipsis),
+                    ),
+                    icon: Icon(Icons.dark_mode),
+                  ),
+                ],
+                selected: {widget.theme.mode},
+                onSelectionChanged: (v) {
+                  widget.onThemeMode?.call(v.first);
+                },
+              ),
             ),
             SizedBox(height: 20.0),
             Wrap(
               alignment: WrapAlignment.center,
-              children:
-                  Colors.primaries.map((color) {
-                    return Ink(
-                      color: color,
-                      width: 50.0,
-                      height: 50.0,
-                      child: InkWell(
-                        onTap: () {
-                          widget.onTheme?.call(color);
-                        },
-                      ),
-                    );
-                  }).toList(),
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                ...Colors.primaries.map(
+                  (color) => Ink(
+                    color: color,
+                    width: 50.0,
+                    height: 50.0,
+                    child: InkWell(
+                      onTap: () {
+                        widget.onTheme?.call(color);
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
             Demo1(),
             Demo2(),

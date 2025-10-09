@@ -8,16 +8,14 @@ class Demo1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final data = ValueNotifier("");
+    final theme = Theme.of(context);
 
     return Column(
       children: [
         ValueListenableBuilder<String>(
           valueListenable: data,
           builder: (context, value, widget) {
-            return Text(
-              value,
-              style: Theme.of(context).textTheme.headlineMedium,
-            );
+            return Text(value, style: theme.textTheme.headlineMedium);
           },
         ),
         ElevatedButton(

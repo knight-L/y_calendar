@@ -94,8 +94,8 @@ class _YCalendarState<T> extends State<YCalendar<T>> {
               ? widget.defaultDate as List<DateTime>
               : [widget.defaultDate as DateTime];
     }
-    _minDate = widget.minDate ?? dateOnly;
-    _maxDate = widget.maxDate ?? dateOnly.add(const Duration(days: 180));
+    _minDate = widget.minDate ?? DateTime(dateOnly.year);
+    _maxDate = widget.maxDate ?? DateTime(dateOnly.year + 1, 1, 0);
 
     onChange();
   }

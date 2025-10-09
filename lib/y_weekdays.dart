@@ -11,7 +11,10 @@ class YWeekdays extends StatelessWidget {
     return SizedBox(
       height: 30.0,
       child: DefaultTextStyle(
-        style: TextStyle(fontSize: 14.0, color: theme.colorScheme.inverseSurface),
+        style: TextStyle(
+          fontSize: 14.0,
+          color: theme.colorScheme.inverseSurface,
+        ),
         child: Row(
           children: List.generate(weekdays.length, (i) {
             return Expanded(child: Center(child: Text(weekdays[i])));

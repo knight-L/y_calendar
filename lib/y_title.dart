@@ -14,10 +14,7 @@ class YTitle extends StatelessWidget {
           height: 44.0,
           child: Text(
             title,
-            style: const TextStyle(
-              fontSize: 16.0,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
           ),
         ),
         const Align(alignment: Alignment.topRight, child: CloseButton()),

@@ -170,7 +170,9 @@ class YMonthItem extends StatelessWidget {
                                           fontSize: 16.0,
                                           color:
                                               disable
-                                                  ? theme.colorScheme.outlineVariant
+                                                  ? theme
+                                                      .colorScheme
+                                                      .outlineVariant
                                                   : status.textColor,
                                         ),
                                       ),

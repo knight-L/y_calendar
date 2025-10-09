@@ -13,7 +13,7 @@ class YFlitterDate extends StatefulWidget {
 class _YFlitterDateState extends State<YFlitterDate> {
   final DateTime _nowTime = DateTime.now();
 
-  get _tabs => [
+  List<Map> get _tabs => [
     {'label': '本周', 'value': DateUtil.getThisWeek(_nowTime)},
     {'label': '上周', 'value': DateUtil.getLastWeek(_nowTime)},
     {'label': '下周', 'value': DateUtil.getNextWeek(_nowTime)},

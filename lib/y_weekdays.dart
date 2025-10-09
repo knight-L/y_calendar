@@ -7,22 +7,16 @@ class YWeekdays extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SizedBox(
       height: 30.0,
-      child: Row(
-        children: List.generate(weekdays.length, (i) {
-          return Expanded(
-            child: Center(
-              child: Text(
-                weekdays[i],
-                style: const TextStyle(
-                  fontSize: 14.0,
-                  color: Color(0xff323233),
-                ),
-              ),
-            ),
-          );
-        }),
+      child: DefaultTextStyle(
+        style: TextStyle(fontSize: 14.0, color: theme.colorScheme.inverseSurface),
+        child: Row(
+          children: List.generate(weekdays.length, (i) {
+            return Expanded(child: Center(child: Text(weekdays[i])));
+          }),
+        ),
       ),
     );
   }

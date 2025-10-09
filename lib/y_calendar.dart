@@ -160,7 +160,7 @@ class _YCalendarState<T> extends State<YCalendar<T>> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = widget.color ?? theme.primaryColor;
+    final color = widget.color ?? theme.colorScheme.primary;
 
     return AspectRatio(
       aspectRatio: 0.7,
@@ -245,7 +245,10 @@ class _YCalendarState<T> extends State<YCalendar<T>> {
                         ),
                       ),
                       FilledButton(
-                        style: FilledButton.styleFrom(backgroundColor: color),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: color,
+                          minimumSize: Size.fromHeight(48.0),
+                        ),
                         onPressed:
                             (_isRange
                                     ? _currentDate.length == 2

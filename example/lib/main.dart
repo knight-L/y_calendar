@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:y_calendar/y_calendar.dart';
 
+import 'custom_theme.dart';
 import 'home.dart';
 
 void main() {
@@ -10,7 +11,9 @@ void main() {
 class MyApp extends StatelessWidget {
   MyApp({super.key});
 
-  final theme = ValueNotifier<Color>(Colors.deepPurple);
+  final theme = ValueNotifier<CustomTheme>(
+    CustomTheme(ThemeMode.system, Colors.deepPurple),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -18,10 +21,26 @@ class MyApp extends StatelessWidget {
       builder: (context, v, widget) {
         return MaterialApp(
           title: 'Flutter Demo',
-          theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: v)),
+          themeMode: v.mode,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: v.color,
+              brightness: Brightness.light,
+            ),
+          ),
+          darkTheme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: v.color,
+              brightness: Brightness.dark,
+            ),
+          ),
           home: MyHomePage(
+            theme: v,
             onTheme: (color) {
-              theme.value = color;
+              theme.value = v.copyWith(color: color);
+            },
+            onThemeMode: (mode) {
+              theme.value = v.copyWith(mode: mode);
             },
           ),
         );

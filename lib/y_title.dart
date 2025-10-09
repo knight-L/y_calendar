@@ -16,7 +16,6 @@ class YTitle extends StatelessWidget {
             title,
             style: const TextStyle(
               fontSize: 16.0,
-              color: Color(0xff323233),
               fontWeight: FontWeight.bold,
             ),
           ),

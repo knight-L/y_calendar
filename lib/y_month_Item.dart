@@ -33,6 +33,7 @@ class YMonthItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     int currentYear = month.year;
     int currentMonth = month.month;
 
@@ -75,7 +76,7 @@ class YMonthItem extends StatelessWidget {
                       Status status = Status(
                         "",
                         null,
-                        const Color(0xff323233),
+                        theme.colorScheme.inverseSurface,
                         null,
                       );
                       if (isRange) {
@@ -169,7 +170,7 @@ class YMonthItem extends StatelessWidget {
                                           fontSize: 16.0,
                                           color:
                                               disable
-                                                  ? const Color(0xffc8c9cc)
+                                                  ? theme.colorScheme.outlineVariant
                                                   : status.textColor,
                                         ),
                                       ),

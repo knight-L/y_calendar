@@ -8,14 +8,15 @@ class YMonthTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       alignment: AlignmentDirectional.center,
       height: 44.0,
       child: Text(
         "$year年$month月",
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 14.0,
-          color: Color(0xff323233),
+          color: theme.colorScheme.inverseSurface,
           fontWeight: FontWeight.w500,
         ),
       ),

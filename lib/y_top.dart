@@ -11,18 +11,19 @@ class YTop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: round,
-        color: Theme.of(context).cardColor,
-        boxShadow: const [
+        color: theme.cardColor,
+        boxShadow: [
           BoxShadow(
-            color: Colors.black12,
+            color: theme.colorScheme.onSurface.withAlpha(20),
             blurRadius: 10.0, // has the effect of softening the shadow
             spreadRadius: 0, // has the effect of extending the shadow
             offset: Offset(
               0, // horizontal, move right 10
-              2, // vertical, move down 10
+              10, // vertical, move down 10
             ),
           ),
         ],

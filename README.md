@@ -23,7 +23,7 @@
 
 ```yaml
 dependencies:
-  y_calendar: ^0.0.1
+  y_calendar: ^1.0.4
 ```
 
 然后运行：

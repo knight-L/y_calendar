@@ -9,7 +9,7 @@ jobs:
   publish:
     permissions:
       id-token: write # Required for authentication using OIDC
-    uses: dart-lang/setup-dart/.github/workflows/flutter_web.yml@v1
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
   build-deploy:
     runs-on: ubuntu-latest
     defaults:

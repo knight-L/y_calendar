@@ -6,6 +6,10 @@ on:
       - 'v*'          # 只在 v1.0.0 这类 tag 推送时触发
 
 jobs:
+  publish:
+    permissions:
+      id-token: write # Required for authentication using OIDC
+    uses: dart-lang/setup-dart/.github/workflows/flutter_web.yml@v1
   build-deploy:
     runs-on: ubuntu-latest
     defaults:

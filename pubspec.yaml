@@ -1,6 +1,6 @@
 name: y_calendar
-description: "一个美观、易用的 Flutter 日历选择组件，支持单日期选择和日期范围选择。"
-version: 1.0.4
+description: "A beautiful and user-friendly Flutter calendar picker component that supports both single-date and date-range selection."
+version: 1.0.5
 homepage: "https://github.com/knight-L/y_calendar"
 
 environment:

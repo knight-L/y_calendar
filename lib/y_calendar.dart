@@ -1,8 +1,11 @@
+library;
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
-import 'y_flitter_date.dart';
 import 'y_month_item.dart';
 import 'y_top.dart';
+
+part './utils/date_util.dart';
 
 class YCalendar<T> extends StatefulWidget {
   // 日历标题
@@ -36,7 +39,7 @@ class YCalendar<T> extends StatefulWidget {
   final double height;
 
   // 自定义过滤项
-  final bool? cumFlitter;
+  final Map<String, List<DateTime>>? presets;
 
   const YCalendar({
     super.key,
@@ -50,7 +53,7 @@ class YCalendar<T> extends StatefulWidget {
     this.closeOnClickOverlay = true,
     this.confirmText = "确定",
     this.height = 400.0,
-    this.cumFlitter,
+    this.presets,
   }) : assert(
          T == DateTime || T == List<DateTime>,
          'T 只能是 DateTime 或 List<DateTime>，但传入的是 $T',
@@ -177,7 +180,7 @@ class _YCalendarState<T> extends State<YCalendar<T>> {
                   children: <Widget>[
                     YTop(title: widget.title, round: widget.round),
                     Expanded(
-                      child: Container(
+                      child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: CustomScrollView(
                           center: sliverAfterKey,
@@ -227,23 +230,31 @@ class _YCalendarState<T> extends State<YCalendar<T>> {
               ),
               Visibility(
                 visible: widget.showConfirm,
-                child: Container(
-                  padding: const EdgeInsets.all(8.0),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 8.0),
                   child: Column(
+                    spacing: 8.0,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Visibility(
-                        visible: widget.cumFlitter ?? false,
-                        child: YFlitterDate(
-                          onChange: (val) {
-                            setState(() {
-                              _currentDate =
-                                  val.map((e) => DateTime.parse(e)).toList();
-                              onChange();
-                            });
-                          },
+                      if (widget.presets != null)
+                        Wrap(
+                          alignment: WrapAlignment.spaceBetween,
+                          children: [
+                            ...?widget.presets?.entries.map(
+                              (el) => ActionChip(
+                                label: Text(el.key),
+                                visualDensity: VisualDensity.compact,
+                                labelStyle: theme.textTheme.labelSmall,
+                                onPressed: () {
+                                  setState(() {
+                                    _currentDate = el.value;
+                                    onChange();
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
                       FilledButton(
                         style: FilledButton.styleFrom(
                           backgroundColor: color,

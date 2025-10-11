@@ -1,11 +1,15 @@
+## 1.0.5
+
+- Custom presets
+
 ## 1.0.4
 
-*  默认日期可选择范围为当前年份前后一年
+- The default date selection range is one year before and after the current year
 
 ## 1.0.3
 
-*  适配主题
+- Adapt the theme
 
 ## 0.0.1
 
-* TODO: Describe initial release.
+- TODO: Describe initial release.

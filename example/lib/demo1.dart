@@ -10,6 +10,17 @@ class Demo1 extends StatelessWidget {
     final data = ValueNotifier("");
     final theme = Theme.of(context);
 
+    final DateTime nowTime = DateTime.now();
+
+    final Map<String, List<DateTime>> presets = {
+      '本周': DateUtil.getThisWeek(nowTime),
+      '上周': DateUtil.getLastWeek(nowTime),
+      '下周': DateUtil.getNextWeek(nowTime),
+      '本月': DateUtil.getThisMonth(nowTime),
+      '上月': DateUtil.getLastMonth(nowTime),
+      '下月': DateUtil.getNextMonth(nowTime),
+    };
+
     return Column(
       children: [
         ValueListenableBuilder<String>(
@@ -21,10 +32,11 @@ class Demo1 extends StatelessWidget {
         ElevatedButton(
           onPressed: () async {
             List<DateTime>? date = await YCalendar<List<DateTime>>(
-              cumFlitter: true,
+              presets: presets,
             ).showBottomSheet(context);
-            data.value =
-                date?.map(DateFormat('yyyy-MM-dd').format).toString() ?? "";
+            if (date != null) {
+              data.value = date.map(DateFormat('yyyy-MM-dd').format).toString();
+            }
           },
           child: Text('范围选择'),
         ),

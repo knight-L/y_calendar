@@ -7,7 +7,7 @@ class Demo2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final data = ValueNotifier("");
+    final data = ValueNotifier<String>("");
     final theme = Theme.of(context);
 
     return Column(
@@ -20,7 +20,9 @@ class Demo2 extends StatelessWidget {
         ),
         ElevatedButton(
           onPressed: () async {
-            final date = await YCalendar<DateTime>().showBottomSheet(context);
+            DateTime? date = await YCalendar<DateTime>().showBottomSheet(
+              context,
+            );
             if (date != null) {
               data.value = DateFormat('yyyy-MM-dd').format(date);
             }

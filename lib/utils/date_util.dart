@@ -1,4 +1,4 @@
-import 'package:intl/intl.dart';
+part of '../y_calendar.dart';
 
 class DateUtil {
   DateUtil._();
@@ -214,7 +214,7 @@ class DateUtil {
   }
 
   /// 获取本周
-  static List<String> getThisWeek(DateTime date) {
+  static List<DateTime> getThisWeek(DateTime date) {
     int current = date.weekday;
     DateTime firstDay = DateTime.fromMillisecondsSinceEpoch(
       date.millisecondsSinceEpoch - (24 * 60 * 60 * 1000 * (current - 1)),
@@ -222,14 +222,11 @@ class DateUtil {
     DateTime lastDay = DateTime.fromMillisecondsSinceEpoch(
       date.millisecondsSinceEpoch + (24 * 60 * 60 * 1000 * (7 - current)),
     );
-    return [
-      DateFormat('yyyy-MM-dd').format(firstDay),
-      DateFormat('yyyy-MM-dd').format(lastDay),
-    ];
+    return [firstDay, lastDay];
   }
 
   /// 获取上周
-  static List<String> getLastWeek(DateTime date) {
+  static List<DateTime> getLastWeek(DateTime date) {
     int current = date.weekday;
     DateTime firstDay = DateTime.fromMillisecondsSinceEpoch(
       date.millisecondsSinceEpoch -
@@ -243,14 +240,11 @@ class DateUtil {
           (24 * 60 * 60 * 1000 * 7),
     );
 
-    return [
-      DateFormat('yyyy-MM-dd').format(firstDay),
-      DateFormat('yyyy-MM-dd').format(lastDay),
-    ];
+    return [firstDay, lastDay];
   }
 
   /// 获取下周
-  static List<String> getNextWeek(DateTime date) {
+  static List<DateTime> getNextWeek(DateTime date) {
     // 当前周的周一
     final thisWeekMonday = date.subtract(Duration(days: date.weekday - 1));
     // 下周周一
@@ -262,30 +256,21 @@ class DateUtil {
     );
 
     final nextWeekSunday = nextWeekStart.add(Duration(days: 6));
-    return [
-      DateFormat('yyyy-MM-dd').format(nextWeekStart),
-      DateFormat('yyyy-MM-dd').format(nextWeekSunday),
-    ];
+    return [nextWeekStart, nextWeekSunday];
   }
 
   /// 获取本月
-  static List<String> getThisMonth(DateTime date) {
+  static List<DateTime> getThisMonth(DateTime date) {
     int year = date.year, month = date.month;
 
-    return [
-      DateFormat('yyyy-MM-dd').format(DateTime(year, month, 1)),
-      DateFormat('yyyy-MM-dd').format(DateTime(year, month + 1, 0)),
-    ];
+    return [DateTime(year, month, 1), DateTime(year, month + 1, 0)];
   }
 
   /// 获取上月
-  static List<String> getLastMonth(DateTime date) {
+  static List<DateTime> getLastMonth(DateTime date) {
     int year = date.year, month = date.month;
 
-    return [
-      DateFormat('yyyy-MM-dd').format(DateTime(year, month - 1, 1)),
-      DateFormat('yyyy-MM-dd').format(DateTime(year, month, 0)),
-    ];
+    return [DateTime(year, month - 1, 1), DateTime(year, month, 0)];
   }
 
   /// 获取本月-截止当天
@@ -299,7 +284,7 @@ class DateUtil {
   }
 
   /// 获取下月
-  static List<String> getNextMonth(DateTime date) {
+  static List<DateTime> getNextMonth(DateTime date) {
     // 下月第一天
     final nextMonthStart = DateTime(date.year, date.month + 1, 1);
     // 下月最后一天 = 下下月第一天 - 1 天
@@ -308,9 +293,6 @@ class DateUtil {
       nextMonthStart.month + 1,
       1,
     ).subtract(Duration(days: 1));
-    return [
-      DateFormat('yyyy-MM-dd').format(nextMonthStart),
-      DateFormat('yyyy-MM-dd').format(nextMonthEnd),
-    ];
+    return [nextMonthStart, nextMonthEnd];
   }
 }

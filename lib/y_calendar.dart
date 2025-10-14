@@ -92,16 +92,16 @@ class _YCalendarState<T> extends State<YCalendar<T>> {
   void initState() {
     super.initState();
     _isRange = T == List<DateTime>;
-    if (widget.defaultDate != null) {
-      _currentDate =
-          _isRange
-              ? widget.defaultDate as List<DateTime>
-              : [widget.defaultDate as DateTime];
-    }
     _minDate = widget.minDate ?? DateTime(dateOnly.year - 1);
     _maxDate = widget.maxDate ?? DateTime(dateOnly.year + 2, 1, 0);
 
-    onChange();
+    onChange(
+      widget.defaultDate != null
+          ? _isRange
+              ? widget.defaultDate as List<DateTime>
+              : [widget.defaultDate as DateTime]
+          : null,
+    );
   }
 
   @override
@@ -109,21 +109,24 @@ class _YCalendarState<T> extends State<YCalendar<T>> {
     super.dispose();
   }
 
-  void onChange() {
+  void onChange(List<DateTime>? date) {
     _initialMonthIndex = DateUtils.monthDelta(
       _minDate,
-      _currentDate.isNotEmpty ? _currentDate.first : dateOnly,
+      date != null ? date.first : dateOnly,
     );
-    if (_currentDate.isEmpty) return;
+    if (date == null) return;
 
-    if (_isRange) {
-      for (var el in _currentDate) {
-        var newEl = DateUtils.dateOnly(el);
-        el = newEl.isAfter(_maxDate) ? _maxDate : newEl;
+    setState(() {
+      if (_isRange) {
+        _currentDate =
+            date.map((e) {
+              var newEl = DateUtils.dateOnly(e);
+              return newEl.isAfter(_maxDate) ? _maxDate : newEl;
+            }).toList();
+      } else {
+        _currentDate = [date.first];
       }
-    } else {
-      _currentDate = [_currentDate.first];
-    }
+    });
   }
 
   void close(T date) {
@@ -247,10 +250,7 @@ class _YCalendarState<T> extends State<YCalendar<T>> {
                                 visualDensity: VisualDensity.compact,
                                 labelStyle: theme.textTheme.labelSmall,
                                 onPressed: () {
-                                  setState(() {
-                                    _currentDate = el.value;
-                                    onChange();
-                                  });
+                                  onChange(el.value);
                                 },
                               ),
                             ),

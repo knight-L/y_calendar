@@ -1,3 +1,7 @@
+## 1.0.7
+
+- Increase vibration feedback
+
 ## 1.0.6
 
 - Fixed the style error when selecting this week or last week

@@ -1,6 +1,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import 'y_month_item.dart';
@@ -9,37 +10,37 @@ import 'y_top.dart';
 part './utils/date_util.dart';
 
 class YCalendar<T> extends StatefulWidget {
-  // 日历标题
+  /// 日历标题
   final String title;
 
-  // 颜色，对底部按钮和选中日期生效
+  /// 颜色，对底部按钮和选中日期生效
   final Color? color;
 
-  // 最小日期
+  /// 最小日期
   final DateTime? minDate;
 
-  // 最大日期
+  /// 最大日期
   final DateTime? maxDate;
 
-  // 默认选中的日期
+  /// 默认选中的日期
   final T? defaultDate;
 
-  // 是否显示圆角弹窗
+  /// 是否显示圆角弹窗
   final BorderRadiusGeometry round;
 
-  // 是否展示确认按钮
+  /// 是否展示确认按钮
   final bool showConfirm;
 
-  // 是否在点击遮罩层后关闭
+  /// 是否在点击遮罩层后关闭
   final bool closeOnClickOverlay;
 
-  // 确认按钮的文字
+  /// 确认按钮的文字
   final String confirmText;
 
-  // 日程高度
+  /// 日程高度
   final double height;
 
-  // 自定义过滤项
+  /// 自定义过滤项
   final Map<String, List<DateTime>>? presets;
 
   const YCalendar({
@@ -81,11 +82,12 @@ class YCalendar<T> extends StatefulWidget {
 }
 
 class _YCalendarState<T> extends State<YCalendar<T>> {
-  List<DateTime> _currentDate = [];
+  final ScrollController _scrollController = ScrollController();
+  final ValueNotifier<List<DateTime>> _currentDate = ValueNotifier([]);
   late DateTime _minDate;
   late DateTime _maxDate;
   bool _isRange = false;
-  int _initialMonthIndex = 0;
+  final ValueNotifier<int> _initialMonthIndex = ValueNotifier(0);
   final DateTime dateOnly = DateUtils.dateOnly(DateTime.now());
 
   @override
@@ -106,27 +108,27 @@ class _YCalendarState<T> extends State<YCalendar<T>> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     super.dispose();
   }
 
   void onChange(List<DateTime>? date) {
-    _initialMonthIndex = DateUtils.monthDelta(
+    _initialMonthIndex.value = DateUtils.monthDelta(
       _minDate,
       date != null ? date.first : dateOnly,
     );
+    if (_scrollController.hasClients) {
+      _scrollController.jumpTo(0.0);
+    }
     if (date == null) return;
 
-    setState(() {
-      if (_isRange) {
-        _currentDate =
-            date.map((e) {
+    _currentDate.value =
+        _isRange
+            ? date.map((e) {
               var newEl = DateUtils.dateOnly(e);
               return newEl.isAfter(_maxDate) ? _maxDate : newEl;
-            }).toList();
-      } else {
-        _currentDate = [date.first];
-      }
-    });
+            }).toList()
+            : _currentDate.value = [date.first];
   }
 
   void close(T date) {
@@ -134,30 +136,30 @@ class _YCalendarState<T> extends State<YCalendar<T>> {
   }
 
   void select(DateTime value) {
-    setState(() {
-      if (_isRange) {
-        // 范围
-        if (_currentDate.length >= 2 ||
-            (_currentDate.isNotEmpty && value.isBefore(_currentDate.first))) {
-          _currentDate.clear();
-        }
-        _currentDate.add(value);
-
-        if (!widget.showConfirm && _currentDate.length == 2) {
-          close(_currentDate as T);
-        }
-      } else {
-        // 单选
-        _currentDate.insert(0, value);
-        if (!widget.showConfirm) {
-          close(_currentDate.first as T);
-        }
+    HapticFeedback.selectionClick();
+    if (_isRange) {
+      // 范围
+      if (_currentDate.value.length >= 2 ||
+          (_currentDate.value.isNotEmpty &&
+              value.isBefore(_currentDate.value.first))) {
+        _currentDate.value = [];
       }
-    });
+      _currentDate.value = [..._currentDate.value, value];
+
+      if (!widget.showConfirm && _currentDate.value.length == 2) {
+        close(_currentDate.value as T);
+      }
+    } else {
+      // 单选
+      _currentDate.value = [value];
+      if (!widget.showConfirm) {
+        close(_currentDate.value.first as T);
+      }
+    }
   }
 
   void confirm() {
-    close(_isRange ? _currentDate as T : _currentDate.first as T);
+    close(_isRange ? _currentDate.value as T : _currentDate.value.first as T);
   }
 
   int get _numberOfMonths => DateUtils.monthDelta(_minDate, _maxDate) + 1;
@@ -186,46 +188,60 @@ class _YCalendarState<T> extends State<YCalendar<T>> {
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: CustomScrollView(
-                          center: sliverAfterKey,
-                          slivers: <Widget>[
-                            SliverList(
-                              delegate: SliverChildBuilderDelegate(
-                                (BuildContext context, int index) => YMonthItem(
-                                  color: color,
-                                  minDate: _minDate,
-                                  maxDate: _maxDate,
-                                  isRange: _isRange,
-                                  selectDate: _currentDate,
-                                  month: DateUtils.addMonthsToMonthDate(
-                                    _minDate,
-                                    _initialMonthIndex - index - 1,
-                                  ),
-                                  onSelect: select,
-                                ),
-                                childCount: _initialMonthIndex,
-                              ),
-                            ),
-                            SliverList(
-                              key: sliverAfterKey,
-                              delegate: SliverChildBuilderDelegate(
-                                (context, index) => YMonthItem(
-                                  color: color,
-                                  minDate: _minDate,
-                                  maxDate: _maxDate,
-                                  isRange: _isRange,
-                                  selectDate: _currentDate,
-                                  month: DateUtils.addMonthsToMonthDate(
-                                    _minDate,
-                                    _initialMonthIndex + index,
-                                  ),
-                                  onSelect: select,
-                                ),
-                                childCount:
-                                    _numberOfMonths - _initialMonthIndex,
-                              ),
-                            ),
-                          ],
+                        child: ValueListenableBuilder(
+                          valueListenable: _currentDate,
+                          builder: (context, v, _) {
+                            return ValueListenableBuilder(
+                              valueListenable: _initialMonthIndex,
+                              builder: (context, monthIndex, _) {
+                                return CustomScrollView(
+                                  controller: _scrollController,
+                                  center: sliverAfterKey,
+                                  slivers: <Widget>[
+                                    SliverList(
+                                      delegate: SliverChildBuilderDelegate(
+                                        (
+                                          BuildContext context,
+                                          int index,
+                                        ) => YMonthItem(
+                                          color: color,
+                                          minDate: _minDate,
+                                          maxDate: _maxDate,
+                                          isRange: _isRange,
+                                          selectDate: v,
+                                          month: DateUtils.addMonthsToMonthDate(
+                                            _minDate,
+                                            monthIndex - index - 1,
+                                          ),
+                                          onSelect: select,
+                                        ),
+                                        childCount: monthIndex,
+                                      ),
+                                    ),
+                                    SliverList(
+                                      key: sliverAfterKey,
+                                      delegate: SliverChildBuilderDelegate(
+                                        (context, index) => YMonthItem(
+                                          color: color,
+                                          minDate: _minDate,
+                                          maxDate: _maxDate,
+                                          isRange: _isRange,
+                                          selectDate: v,
+                                          month: DateUtils.addMonthsToMonthDate(
+                                            _minDate,
+                                            monthIndex + index,
+                                          ),
+                                          onSelect: select,
+                                        ),
+                                        childCount:
+                                            _numberOfMonths - monthIndex,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -250,24 +266,28 @@ class _YCalendarState<T> extends State<YCalendar<T>> {
                                 visualDensity: VisualDensity.compact,
                                 labelStyle: theme.textTheme.labelSmall,
                                 onPressed: () {
+                                  HapticFeedback.selectionClick();
                                   onChange(el.value);
                                 },
                               ),
                             ),
                           ],
                         ),
-                      FilledButton(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: color,
-                          minimumSize: Size.fromHeight(48.0),
-                        ),
-                        onPressed:
-                            (_isRange
-                                    ? _currentDate.length == 2
-                                    : _currentDate.isNotEmpty)
-                                ? confirm
-                                : null,
-                        child: Text(widget.confirmText),
+                      ValueListenableBuilder(
+                        valueListenable: _currentDate,
+                        builder: (context, v, _) {
+                          return FilledButton(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: color,
+                              minimumSize: Size.fromHeight(48.0),
+                            ),
+                            onPressed:
+                                (_isRange ? v.length == 2 : v.isNotEmpty)
+                                    ? confirm
+                                    : null,
+                            child: Text(widget.confirmText),
+                          );
+                        },
                       ),
                     ],
                   ),

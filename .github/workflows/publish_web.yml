@@ -1,0 +1,39 @@
+name: 发布web
+
+on:
+  # 手动触发
+  workflow_dispatch:
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: example   # 👈 所有命令都在 example 下执行
+
+    steps:
+      # 1. 拉取代码
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. 安装 Flutter
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.32.8'
+
+      # 3. 获取依赖
+      - name: Flutter pub get
+        run: flutter pub get
+
+      # 4. 构建 Web
+      - name: Build Flutter Web
+        run: flutter build web --release --base-href "/${{ github.event.repository.name }}/"
+
+      # 5. 部署到 GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: example/build/web

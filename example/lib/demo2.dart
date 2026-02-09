@@ -11,14 +11,19 @@ class Demo2 extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ValueListenableBuilder<String>(
-          valueListenable: data,
-          builder: (context, value, widget) {
-            return Text(value, style: theme.textTheme.headlineMedium);
-          },
+        Center(
+          child: ValueListenableBuilder<String>(
+            valueListenable: data,
+            builder: (context, value, widget) {
+              return value.isNotEmpty
+                  ? Text(value, style: theme.textTheme.headlineSmall)
+                  : const SizedBox();
+            },
+          ),
         ),
-        ElevatedButton(
+        FilledButton.tonalIcon(
           onPressed: () async {
             DateTime? date = await YCalendar<DateTime>().showBottomSheet(
               context,
@@ -27,7 +32,9 @@ class Demo2 extends StatelessWidget {
               data.value = DateFormat('yyyy-MM-dd').format(date);
             }
           },
-          child: Text('单个日期选择'),
+          style: FilledButton.styleFrom(minimumSize: Size.fromHeight(52.0)),
+          icon: Icon(Icons.calendar_month),
+          label: const Text('单个日期选择'),
         ),
       ],
     );

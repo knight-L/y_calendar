@@ -22,14 +22,19 @@ class Demo1 extends StatelessWidget {
     };
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ValueListenableBuilder<String>(
-          valueListenable: data,
-          builder: (context, value, widget) {
-            return Text(value, style: theme.textTheme.headlineMedium);
-          },
+        Center(
+          child: ValueListenableBuilder<String>(
+            valueListenable: data,
+            builder: (context, value, widget) {
+              return value.isNotEmpty
+                  ? Text(value, style: theme.textTheme.headlineSmall)
+                  : const SizedBox();
+            },
+          ),
         ),
-        ElevatedButton(
+        FilledButton.tonalIcon(
           onPressed: () async {
             List<DateTime>? date = await YCalendar<List<DateTime>>(
               presets: presets,
@@ -38,7 +43,9 @@ class Demo1 extends StatelessWidget {
               data.value = date.map(DateFormat('yyyy-MM-dd').format).toString();
             }
           },
-          child: Text('范围选择'),
+          style: FilledButton.styleFrom(minimumSize: Size.fromHeight(52.0)),
+          icon: Icon(Icons.calendar_month),
+          label: const Text('日期范围选择'),
         ),
       ],
     );

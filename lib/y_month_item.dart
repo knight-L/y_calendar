@@ -52,7 +52,7 @@ class YMonthItem extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 150.0,
                     fontWeight: FontWeight.w500,
-                    color: color.withAlpha(10),
+                    color: color.withValues(alpha: 0.03),
                   ),
                 ),
               ),
@@ -112,7 +112,7 @@ class YMonthItem extends StatelessWidget {
                             currentDate.isBefore(selectDate.last!)) {
                           status = Status(
                             "",
-                            color.withAlpha((255 * 0.1).round()),
+                            color.withValues(alpha: 0.1),
                             null,
                             null,
                           );

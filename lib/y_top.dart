@@ -18,7 +18,7 @@ class YTop extends StatelessWidget {
         color: theme.cardColor,
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.onSurface.withAlpha(20),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.07),
             blurRadius: 10.0, // has the effect of softening the shadow
             spreadRadius: 0, // has the effect of extending the shadow
             offset: Offset(

@@ -23,18 +23,23 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        foregroundColor: theme.colorScheme.inversePrimary,
         title: Text("日期选择组件示例"),
       ),
       body: Center(
-        child: ListView(
-          shrinkWrap: true,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: SegmentedButton<ThemeMode>(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 500),
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            children: <Widget>[
+              Title(color: Colors.grey, child: Text('主题模式')),
+              const SizedBox(height: 8.0),
+              SegmentedButton<ThemeMode>(
                 showSelectedIcon: false,
                 segments: [
                   ButtonSegment(
@@ -67,29 +72,45 @@ class _MyHomePageState extends State<MyHomePage> {
                   widget.onThemeMode?.call(v.first);
                 },
               ),
-            ),
-            SizedBox(height: 20.0),
-            Wrap(
-              alignment: WrapAlignment.center,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                ...Colors.primaries.map(
-                  (color) => Ink(
-                    color: color,
-                    width: 50.0,
-                    height: 50.0,
-                    child: InkWell(
-                      onTap: () {
-                        widget.onTheme?.call(color);
-                      },
+              const SizedBox(height: 20.0),
+              Title(color: Colors.grey, child: Text('主题颜色')),
+              const SizedBox(height: 8.0),
+              GridView.count(
+                crossAxisCount: 6,
+                childAspectRatio: 2.0,
+                mainAxisSpacing: 4.0,
+                crossAxisSpacing: 4.0,
+                shrinkWrap: true,
+                primary: false,
+                children: [
+                  ...Colors.primaries.map(
+                    (color) => Ink(
+                      decoration: BoxDecoration(
+                        color: color,
+                        borderRadius: BorderRadius.circular(25.0),
+                      ),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(25.0),
+                        child:
+                            widget.theme.color == color
+                                ? Icon(Icons.check, color: Colors.white)
+                                : null,
+                        onTap: () {
+                          widget.onTheme?.call(color);
+                        },
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            Demo1(),
-            Demo2(),
-          ],
+                ],
+              ),
+              const SizedBox(height: 20.0),
+              Title(color: Colors.grey, child: Text('功能示例')),
+              const SizedBox(height: 8.0),
+              Demo1(),
+              const SizedBox(height: 20.0),
+              Demo2(),
+            ],
+          ),
         ),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );

@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      builder: (context, v, widget) {
+      builder: (context, v, _) {
         return MaterialApp(
           title: 'Flutter Demo',
           themeMode: v.mode,

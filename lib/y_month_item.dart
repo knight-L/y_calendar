@@ -42,23 +42,23 @@ class YMonthItem extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        return IntrinsicHeight(
-          child: Stack(
-            children: <Widget>[
-              // 背景
-              Align(
-                child: Text(
-                  "$currentMonth",
-                  style: TextStyle(
-                    fontSize: 150.0,
-                    fontWeight: FontWeight.w500,
-                    color: color.withValues(alpha: 0.03),
-                  ),
-                ),
-              ),
-              Column(
+        return Column(
+          children: <Widget>[
+            YMonthTitle(year: currentYear, month: currentMonth),
+            IntrinsicHeight(
+              child: Stack(
                 children: <Widget>[
-                  YMonthTitle(year: currentYear, month: currentMonth),
+                  // 背景
+                  Align(
+                    child: Text(
+                      "$currentMonth",
+                      style: TextStyle(
+                        fontSize: 150.0,
+                        fontWeight: FontWeight.w500,
+                        color: color.withValues(alpha: 0.03),
+                      ),
+                    ),
+                  ),
                   Wrap(
                     children: List.generate(lastDay + emptyDays, (i) {
                       int day = i - emptyDays + 1;
@@ -73,51 +73,50 @@ class YMonthItem extends StatelessWidget {
                           currentDate.isBefore(DateUtils.dateOnly(minDate)) ||
                           currentDate.isAfter(DateUtils.dateOnly(maxDate));
 
+                      // 1. 提取常用的变量，减少属性访问
+                      final firstDate =
+                          selectDate.isNotEmpty ? selectDate.first : null;
+                      final lastDate =
+                          selectDate.length == 2 ? selectDate.last : null;
+
+                      // 2. 提前计算状态布尔值
+                      final isFirstDay =
+                          firstDate != null &&
+                          DateUtils.isSameDay(currentDate, firstDate);
+                      final isLastDay =
+                          lastDate != null &&
+                          DateUtils.isSameDay(currentDate, lastDate);
+                      final isBetween =
+                          firstDate != null &&
+                          lastDate != null &&
+                          currentDate.isAfter(firstDate) &&
+                          currentDate.isBefore(lastDate);
+
+                      // 默认状态（兜底）
                       Status status = Status(
                         "",
                         null,
                         theme.colorScheme.inverseSurface,
                         null,
                       );
+
                       if (isRange) {
-                        if (selectDate.length == 2 &&
-                            DateUtils.isSameDay(
-                              selectDate.first,
-                              selectDate.last,
-                            ) &&
-                            DateUtils.isSameDay(
-                              currentDate,
-                              selectDate.first,
-                            )) {
+                        if (isFirstDay && isLastDay) {
+                          // 选中了同一天作为开始和结束
                           status = Status(
                             "开始/结束",
                             color,
                             Colors.white,
                             BorderRadius.circular(4.0),
                           );
-                        } else if (selectDate.isNotEmpty &&
-                            DateUtils.isSameDay(
-                              currentDate,
-                              selectDate.first,
-                            )) {
+                        } else if (isFirstDay) {
                           status = Status(
                             "开始",
                             color,
                             Colors.white,
                             BorderRadius.horizontal(left: Radius.circular(4.0)),
                           );
-                        } else if (selectDate.length == 2 &&
-                            !isEmpty &&
-                            currentDate.isAfter(selectDate.first!) &&
-                            currentDate.isBefore(selectDate.last!)) {
-                          status = Status(
-                            "",
-                            color.withValues(alpha: 0.1),
-                            null,
-                            null,
-                          );
-                        } else if (selectDate.length == 2 &&
-                            DateUtils.isSameDay(currentDate, selectDate.last)) {
+                        } else if (isLastDay) {
                           status = Status(
                             "结束",
                             color,
@@ -126,21 +125,22 @@ class YMonthItem extends StatelessWidget {
                               right: Radius.circular(4.0),
                             ),
                           );
-                        }
-                      } else {
-                        if (!isEmpty &&
-                            selectDate.isNotEmpty &&
-                            DateUtils.isSameDay(
-                              currentDate,
-                              selectDate.first,
-                            )) {
+                        } else if (isBetween) {
                           status = Status(
                             "",
-                            color,
-                            Colors.white,
-                            BorderRadius.circular(4.0),
+                            color.withValues(alpha: 0.1),
+                            null,
+                            null,
                           );
                         }
+                      } else if (!isEmpty && isFirstDay) {
+                        // 单选模式
+                        status = Status(
+                          "",
+                          color,
+                          Colors.white,
+                          BorderRadius.circular(4.0),
+                        );
                       }
 
                       return SizedBox(
@@ -198,8 +198,8 @@ class YMonthItem extends StatelessWidget {
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );

@@ -128,7 +128,7 @@ class _YCalendarState<T> extends State<YCalendar<T>> {
               var newEl = DateUtils.dateOnly(e);
               return newEl.isAfter(_maxDate) ? _maxDate : newEl;
             }).toList()
-            : _currentDate.value = [date.first];
+            : [date.first];
   }
 
   void close(T date) {
@@ -188,58 +188,54 @@ class _YCalendarState<T> extends State<YCalendar<T>> {
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: ValueListenableBuilder(
-                          valueListenable: _currentDate,
-                          builder: (context, v, _) {
-                            return ValueListenableBuilder(
-                              valueListenable: _initialMonthIndex,
-                              builder: (context, monthIndex, _) {
-                                return CustomScrollView(
-                                  controller: _scrollController,
-                                  center: sliverAfterKey,
-                                  slivers: <Widget>[
-                                    SliverList(
-                                      delegate: SliverChildBuilderDelegate(
-                                        (
-                                          BuildContext context,
-                                          int index,
-                                        ) => YMonthItem(
-                                          color: color,
-                                          minDate: _minDate,
-                                          maxDate: _maxDate,
-                                          isRange: _isRange,
-                                          selectDate: v,
-                                          month: DateUtils.addMonthsToMonthDate(
-                                            _minDate,
-                                            monthIndex - index - 1,
-                                          ),
-                                          onSelect: select,
-                                        ),
-                                        childCount: monthIndex,
+                        child: AnimatedBuilder(
+                          animation: Listenable.merge([
+                            _currentDate,
+                            _initialMonthIndex,
+                          ]),
+                          builder: (context, child) {
+                            return CustomScrollView(
+                              controller: _scrollController,
+                              center: sliverAfterKey,
+                              slivers: <Widget>[
+                                SliverList(
+                                  delegate: SliverChildBuilderDelegate(
+                                    (context, index) => YMonthItem(
+                                      color: color,
+                                      minDate: _minDate,
+                                      maxDate: _maxDate,
+                                      isRange: _isRange,
+                                      selectDate: _currentDate.value,
+                                      month: DateUtils.addMonthsToMonthDate(
+                                        _minDate,
+                                        _initialMonthIndex.value - index - 1,
                                       ),
+                                      onSelect: select,
                                     ),
-                                    SliverList(
-                                      key: sliverAfterKey,
-                                      delegate: SliverChildBuilderDelegate(
-                                        (context, index) => YMonthItem(
-                                          color: color,
-                                          minDate: _minDate,
-                                          maxDate: _maxDate,
-                                          isRange: _isRange,
-                                          selectDate: v,
-                                          month: DateUtils.addMonthsToMonthDate(
-                                            _minDate,
-                                            monthIndex + index,
-                                          ),
-                                          onSelect: select,
-                                        ),
-                                        childCount:
-                                            _numberOfMonths - monthIndex,
+                                    childCount: _initialMonthIndex.value,
+                                  ),
+                                ),
+                                SliverList(
+                                  key: sliverAfterKey,
+                                  delegate: SliverChildBuilderDelegate(
+                                    (context, index) => YMonthItem(
+                                      color: color,
+                                      minDate: _minDate,
+                                      maxDate: _maxDate,
+                                      isRange: _isRange,
+                                      selectDate: _currentDate.value,
+                                      month: DateUtils.addMonthsToMonthDate(
+                                        _minDate,
+                                        _initialMonthIndex.value + index,
                                       ),
+                                      onSelect: select,
                                     ),
-                                  ],
-                                );
-                              },
+                                    childCount:
+                                        _numberOfMonths -
+                                        _initialMonthIndex.value,
+                                  ),
+                                ),
+                              ],
                             );
                           },
                         ),
